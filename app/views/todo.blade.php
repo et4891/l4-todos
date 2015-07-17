@@ -5,19 +5,33 @@
 
     <title>jQuery UI Datepicker - Default functionality</title>
     {{ HTML::style('css/jquery-ui.css');}}
+    {{ HTML::style('css/bootstrap.min.css');}}
+    {{ HTML::style('css/bootstrap-theme.min.css');}}
 {{--    {{ HTML::style('css/style.css');}}--}}
 </head>
 <body>
 
-    <div>
-        <p>Date: <input type="text" id="datepicker" value=""></p>
-        <div id="textField" class="showValue" style="border:1px solid blue;height: 200px; width: 200px;"></div>
-        <input class="todo-input" type="text" placeholder="Type New Item Here" />
-        <button class="add-btn" type="submit">Add</button>
+        {{--<p>Date: <input type="text" id="datepicker" value=""></p>--}}
+        {{--<div id="textField" class="showValue" style="border:1px solid blue;height: 200px; width: 200px;"></div>--}}
+        {{--<input class="todo-input" type="text" placeholder="Type New Item Here" />--}}
+        {{--<button class="add-btn" type="submit">Add</button>--}}
+
+    <div class="well">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h3 class="panel-title">TO DO LIST! <hr/>Date: <input type="text" id="datepicker" value=""></h3>
+            </div>
+            <div class="panel-body">
+                <div id="textField" class="showValue" ></div>
+                <input class="todo-input" type="text" placeholder="Type New Item Here" />
+                <button class="add-btn" type="submit">Add</button>
+            </div>
+        </div>
     </div>
 
     {{ HTML::script('js/jquery-1.10.2.js'); }}
     {{ HTML::script('js/jquery-ui.js'); }}
+    {{ HTML::script('js/bootstrap.min.js');}}
     <script>
         $(function () {
             /*Enable datePicker API created by jQuery*/
