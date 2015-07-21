@@ -26,36 +26,67 @@ class TodoController extends BaseController {
 	 * @return direct to todo.blade.php page
      */
 	public function getIndex(){
-		return View::make('todo');
+		$date = date('Y-m-d H:i:s');
+		return View::make('todo')->with('date', $date);
 	}
 
+	/**
+	 * Adds what is typed in the input field into database
+	 * If a date is not chosen, what is entered will be added into today's date and current time
+	 * If a date is chosen, then what is entered will be added to the date chosen with current time
+	 * After adding, it'll also print a list of the todoText
+     */
 	public function add(){
-		$data = array();
 		$todoTextInput = htmlentities(Input::get('todoTextInput'));
+		if($_POST['dateValue'] == ''){
+			$dateValue = date('Y-m-d');
+		}else{
+			$dateValue = $_POST['dateValue'];
+		}
+
+		$dateValueWithTimeStamp = date($dateValue . ' H:i:s');
+
 		$todo = Todo::create(array(
 			'todoText' 	=> $todoTextInput,
+			'created_at' => $dateValueWithTimeStamp,
 			'done' 		=> 0
 		));
 
 		if($todo){
 			$todo->save();
-			$data[] = 'Successed added';
-		}else{
-			$data[] = 'Adding failed';
 		}
-		echo json_encode($data);
+
+		$this->insertDateValue($dateValue);
 	}
 
 	/**
-	 * @return string
-	 * Search todoText in database using the yy-mm-dd format from the value passed here from the client side
-	 * Pass the todoText as json back to client side
+	 * Simply uses the dateValue in the format of yy-mm-dd to pull the todo list out of the database
      */
 	public function search(){
+		$this->insertDateValue($_POST['dateValue']);
+	}
+
+
+	/**
+	 * **NOT A NECESSARY NEEDED FUNCTION**
+	 * To enter the date in - yy-mm-dd and pass it to the printTodoList()
+	 * @param $dateValue  - yy-mm-dd if null then will set as today
+     */
+	public function insertDateValue($dateValue){
+		$this->printTodoList($dateValue);
+	}
+
+	/**
+	 * To search the todo list entered into the database and pass them back to the view
+	 * This method is currently used inside insertDateValue()
+	 * @param $dateValue  - yy-mm-dd passed into here to find the todo list of the day in database
+     */
+	public function printTodoList($dateValue){
 		$data = array();
-		$dateValue = $_POST['dateValue'];
 		$index = 0;
 
+		//Use the dateValue (yy-mm-dd) to find all rows with the same dateValue and ignores the time
+		//If nothing can be found, a string of empty will be returned or else the todoText in the database will be returned
 		$todos = Todo::where('created_at', 'LIKE',  $dateValue.'%')->get();
 		if(sizeof($todos) == 0){
 			$data[$index] = 'empty';
@@ -65,7 +96,6 @@ class TodoController extends BaseController {
 				$index++;
 			}
 		}
-		return json_encode($data);
+		echo json_encode($data);
 	}
-
 }

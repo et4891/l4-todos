@@ -7,6 +7,10 @@
     {{ HTML::style('css/jquery-ui.css');}}
     {{ HTML::style('css/bootstrap.min.css');}}
     {{ HTML::style('css/bootstrap-theme.min.css');}}
+    <style>
+        hr{margin-top: 0;}
+        .nothing-todo{ list-style: none;}
+    </style>
 {{--    {{ HTML::style('css/style.css');}}--}}
 </head>
 <body>
@@ -14,17 +18,17 @@
         {{--<p>Date: <input type="text" id="datepicker" value=""></p>--}}
         {{--<div id="textField" class="showValue" style="border:1px solid blue;height: 200px; width: 200px;"></div>--}}
         {{--<input class="todo-input" type="text" placeholder="Type New Item Here" />--}}
-        {{--<button class="add-btn" type="submit">Add</button>--}}
+        {{--<button class="add-btn btn btn-info" type="submit">Add</button>--}}
 
     <div class="well">
         <div class="panel panel-success">
             <div class="panel-heading">
-                <h3 class="panel-title">TO DO LIST! <hr/>Date: <input type="text" id="datepicker" value=""></h3>
+                <h3 class="panel-title">TO DO LIST!<br />{{ $date }}<hr/>Date: <input type="text" id="datepicker" value=""></h3>
             </div>
             <div class="panel-body">
-                <div id="textField" class="showValue" ></div>
+                <ol id="textField"></ol>
                 <input class="todo-input" type="text" placeholder="Type New Item Here" />
-                <button class="add-btn" type="submit">Add</button>
+                <button class="add-btn btn btn-info" type="submit">Add</button>
             </div>
         </div>
     </div>
@@ -34,6 +38,8 @@
     {{ HTML::script('js/bootstrap.min.js');}}
     <script>
         $(function () {
+            var globalDateValue = null;
+
             /*Enable datePicker API created by jQuery*/
             //Set the date format to yy-mm-dd
             $( "#datepicker" ).datepicker({
@@ -47,19 +53,28 @@
 
             $('.add-btn').click(addTodoText);
 
-
             /* Add Todo List Function */
             // Add whatever is typed in the input box into the database
+            // "Please enter something" will pop up as an alert if nothing is entered
             function addTodoText(){
                 var todoTextInput = $('.todo-input').val();
+                var dateValue = globalDateValue;
                 if(todoTextInput){
                     $.ajax({
                         method: "POST",
                         url: "/add",
                         dataType: "json",
-                        data: {todoTextInput: todoTextInput},
+                        data: {todoTextInput: todoTextInput, dateValue: dateValue},
                         success: function (data) {
                             console.log(data);
+                            $('.todo-input').val("");
+                            $('.todo-input').attr('placeholder', 'More Items to add?')
+                            if(data != 'empty'){
+                                $('#textField').empty();
+                                $.each(data, function(index, value){
+                                    $('#textField').append('<li>'+value['todo']+'</li><hr>');
+                                });
+                            }
                         }
                     });
                 }else{
@@ -79,7 +94,7 @@
                 }else{
                     searchDateAjax(dateValue);
                 }
-
+                globalDateValue = dateValue;
             }
 
             /* Search Function */
@@ -95,11 +110,11 @@
                         if(data != 'empty'){
                             $('#textField').empty();
                             $.each(data, function(index, value){
-                                $('#textField').append('<p>'+value['todo']+'</p>');
+                                $('#textField').append('<li>'+value['todo']+'</li><hr>');
                             });
                         }else{
                             $('#textField').empty();
-                            $('#textField').append('<p>NO DATA IN THIS DATE</p>');
+                            $('#textField').append("<li class='nothing-todo'>Nothing Entered For Today</li>");
                         }
                     }
                 });
