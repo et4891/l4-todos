@@ -29,6 +29,9 @@
                 <ol id="textField"></ol>
                 <input class="todo-input" type="text" placeholder="Type New Item Here" />
                 <button class="add-btn btn btn-info" type="submit">Add</button>
+                {{--<button class="test btn btn-warning">Current</button>--}}
+                {{--<button class="test1 btn btn-warning">global vs current</button>--}}
+                {{--<button class="test2 btn btn-warning">global</button>--}}
             </div>
         </div>
     </div>
@@ -38,7 +41,20 @@
     {{ HTML::script('js/bootstrap.min.js');}}
     <script>
         $(function () {
+            var globalCurrentDate = getToday();
             var globalDateValue = null;
+
+//            $('.test2').click(function(){
+//                console.log(globalDateValue);
+//            });
+//
+//            $('.test1').click(function(){
+//                console.log(globalCurrentDate > globalDateValue);
+//            });
+//
+//            $('.test').click(function(){
+//               console.log(globalCurrentDate);
+//            });
 
             /*Enable datePicker API created by jQuery*/
             //Set the date format to yy-mm-dd
@@ -51,6 +67,7 @@
                     .mouseleave(getDatePickerValue)
                     .mouseleave();
 
+            // Add button to add items onto todo list choose a current or future date to add
             $('.add-btn').click(addTodoText);
 
             /* Add Todo List Function */
@@ -66,7 +83,6 @@
                         dataType: "json",
                         data: {todoTextInput: todoTextInput, dateValue: dateValue},
                         success: function (data) {
-                            console.log(data);
                             $('.todo-input').val("");
                             $('.todo-input').attr('placeholder', 'More Items to add?')
                             if(data != 'empty'){
@@ -87,14 +103,21 @@
             // If date is empty nothing will be done.
             function getDatePickerValue(){
                 var dateValue = $( "#datepicker" ).val();
-                //check if dateValue is empty string
-//                    console.log(dateValue == '');
+
+                //If no date is chosen
                 if(dateValue == ''){
                     dateValue = null
                 }else{
                     searchDateAjax(dateValue);
                 }
-                globalDateValue = dateValue;
+                globalDateValue = dateValue;  //storing this to a global variable for addTodoText()
+
+                //Checking if the date is older than current date, if it is disable the add button
+                if(globalCurrentDate > globalDateValue){
+                    $('.add-btn').attr('disabled', 'disabled');
+                }else{
+                    $('.add-btn').removeAttr('disabled')
+                }
             }
 
             /* Search Function */
@@ -118,6 +141,26 @@
                         }
                     }
                 });
+            }
+
+            /* getToday Function */
+            // Just a simple function to get today's date
+            // Currently used to compare with the date selected
+            function getToday(){
+                var today = new Date();
+                var dd = today.getDate();
+                var mm = today.getMonth()+1; //January is 0!
+                var yy = today.getFullYear();
+
+                if(dd<10) {
+                    dd='0'+dd
+                }
+
+                if(mm<10) {
+                    mm='0'+mm
+                }
+
+                return globalCurrentDate = yy+'-'+mm+'-'+dd;
             }
         });
     </script>

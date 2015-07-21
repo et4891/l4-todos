@@ -56,31 +56,33 @@ class TodoController extends BaseController {
 			$todo->save();
 		}
 
-		$this->insertDateValue($dateValue);
+		echo $this->insertDateValue($dateValue);
 	}
 
 	/**
 	 * Simply uses the dateValue in the format of yy-mm-dd to pull the todo list out of the database
      */
 	public function search(){
-		$this->insertDateValue($_POST['dateValue']);
+		echo $this->insertDateValue($_POST['dateValue']);
 	}
 
 
 	/**
 	 * **NOT A NECESSARY NEEDED FUNCTION**
 	 * To enter the date in - yy-mm-dd and pass it to the printTodoList()
-	 * @param $dateValue  - yy-mm-dd if null then will set as today
-     */
+	 * @param $dateValue - yy-mm-dd if null then will set as today
+	 * @return string    - whatever that is in printTodoList()
+	 */
 	public function insertDateValue($dateValue){
-		$this->printTodoList($dateValue);
+		return $this->printTodoList($dateValue);
 	}
 
 	/**
 	 * To search the todo list entered into the database and pass them back to the view
 	 * This method is currently used inside insertDateValue()
-	 * @param $dateValue  - yy-mm-dd passed into here to find the todo list of the day in database
-     */
+	 * @param $dateValue - yy-mm-dd passed into here to find the todo list of the day in database
+	 * @return string	 - return all the todoList in json format
+	 */
 	public function printTodoList($dateValue){
 		$data = array();
 		$index = 0;
@@ -96,6 +98,6 @@ class TodoController extends BaseController {
 				$index++;
 			}
 		}
-		echo json_encode($data);
+		return json_encode($data);
 	}
 }
