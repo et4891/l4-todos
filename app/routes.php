@@ -20,5 +20,7 @@
 //	$todo->save();
 Route::POST('add','TodoController@add');
 Route::POST('search','TodoController@search');
+Route::POST('done','TodoController@done');
+Route::POST('delete','TodoController@delete');
 
 Route::controller('/','TodoController');

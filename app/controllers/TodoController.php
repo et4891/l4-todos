@@ -9,19 +9,6 @@
  */
 class TodoController extends BaseController {
 
-	/*
-	|--------------------------------------------------------------------------
-	| Default Home Controller
-	|--------------------------------------------------------------------------
-	|
-	| You may wish to use controllers instead of, or in addition to, Closure
-	| based routes. That's great! Here is an example controller method to
-	| get you started. To route to this controller, just add the route:
-	|
-	|	Route::get('/', 'HomeController@showWelcome');
-	|
-	*/
-
 	/**
 	 * @return direct to todo.blade.php page
      */
@@ -95,9 +82,60 @@ class TodoController extends BaseController {
 		}else{
 			foreach($todos as $key => $todo){
 				$data[$index]['todo'] = $todo['todoText'];
+				$data[$index]['done'] = $todo['done'];
+				$data[$index]['id']   = $todo['id'];
 				$index++;
 			}
 		}
 		return json_encode($data);
+	}
+
+	/**
+	 *  calls the doubleD() and runs the done action
+     */
+	public function done(){
+		echo $this->doubleD('done');
+	}
+
+	/**
+	 * calls the doubleD() and runs the delete action
+     */
+	public function delete(){
+		echo $this->doubleD('delete');
+	}
+
+	/**
+	 * Used in done() and delete()
+	 * The specific row is determined by using the id and the todoText
+	 * If both of them matches the row in the database, that is the row needed.
+	 *
+	 * When action done is passed into the parameter, the database will change the row's done column to 1 which means the item is done
+	 * When action delete is passed into the parameter, the database will delete the row.
+	 *
+	 * Named doubleD because done and delete both start with d
+	 * @param $action			-either done or delete to determine the action will be done in the database
+	 * @return string			-just a string to return saying done / delete success
+     */
+	public function doubleD($action){
+		$id = $_POST['getID'];
+		$todoText = htmlentities($_POST['todoText']);
+
+		if($action == 'done'){
+			$todos = Todo::where('id', '=', $id)->where('todoText', '=', $todoText)->get();
+			$todos[0]->done = 1;
+			$todos[0]->touch();
+			$todos[0]->save();
+
+			return json_encode('done-success');
+		}
+
+		if($action == 'delete'){
+			$todos = Todo::where('id', '=', $id)->where('todoText', '=', $todoText)
+				->where('done', '=', 1)->get();
+			$todos[0]->delete();
+
+			return json_encode('delete-success');
+		}
+
 	}
 }

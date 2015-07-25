@@ -9,7 +9,9 @@
     {{ HTML::style('css/bootstrap-theme.min.css');}}
     <style>
         hr{margin-top: 0;}
-        .nothing-todo{ list-style: none;}
+        .nothing-todo{list-style: none;}
+        .done-btn, .delete-btn{float: right;}
+        .done-strike{text-decoration: line-through;}
     </style>
 {{--    {{ HTML::style('css/style.css');}}--}}
 </head>
@@ -70,6 +72,112 @@
             // Add button to add items onto todo list choose a current or future date to add
             $('.add-btn').click(addTodoText);
 
+            $('ol#textField').on('click', '.done-btn', doneButton);
+
+            $('ol#textField').on('click', '.delete-btn', deleteButton);
+
+//            function doubleD(action){
+//                var $clicked = $(this); //Making sure only work with the current element
+//
+//                var $cLI = $clicked.closest('li');  //Find the closest li element clicked
+//
+//                //Goes to the closest li element and get only the content in li
+//                //Does not include the child element which is what I want
+//                //Or else the done / delete text will be shown too
+//                var todoText = $cLI.clone().children().remove().end().text();
+//
+//                var getID = $cLI.attr('id');  //get the id of the todoText
+//
+//                if(action == 'done'){
+//                    var $cSpan = $clicked.closest('span');  //Find the closest span element clicked
+//                    $.ajax({
+//                        method: "POST",
+//                        url: "/done",
+//                        dataType: "json",
+//                        data: {todoText: todoText, getID: getID},
+//                        success: function () {
+//                            $cLI.addClass('done-strike');
+//                            $cSpan.removeClass('done-btn btn-success');
+//                            $cSpan.closest('span').text('Delete');
+//                            $cSpan.closest('span').addClass('delete-btn btn-warning');
+//
+//                        }
+//                    });
+//                }
+//
+//                if(action == 'delete'){
+//                    $.ajax({
+//                        method: "POST",
+//                        url: "/delete",
+//                        dataType: "json",
+//                        data: {todoText: todoText, getID: getID},
+//                        success: function () {
+//                            $cLI.next('hr').remove();
+//                            $cLI.remove();
+//                        }
+//                    });
+//                }
+//            }
+
+            function deleteButton(e){
+                e.preventDefault();
+
+                var $clicked = $(this); //Making sure only work with the current element
+
+                var $cLI = $clicked.closest('li');  //Find the closest li element clicked
+
+                //Goes to the closest li element and get only the content in li
+                //Does not include the child element which is what I want
+                //Or else the done / delete text will be shown too
+                var todoText = $cLI.clone().children().remove().end().text();
+
+                var getID = $cLI.attr('id');  //get the id of the todoText
+
+                $.ajax({
+                    method: "POST",
+                    url: "/delete",
+                    dataType: "json",
+                    data: {todoText: todoText, getID: getID},
+                    success: function () {
+                        $cLI.next('hr').remove();
+                        $cLI.remove();
+                    }
+                });
+            }
+
+            function doneButton(e){
+                e.preventDefault();
+
+                var $clicked = $(this); //Making sure only work with the current element
+
+                var $cLI = $clicked.closest('li');  //Find the closest li element clicked
+                var $cSpan = $clicked.closest('span');  //Find the closest span element clicked
+
+                //Goes to the closest li element and get only the content in li
+                //Does not include the child element which is what I want
+                //Or else the done / delete text will be shown too
+                var todoText = $cLI.clone().children().remove().end().text();
+
+                var getID = $cLI.attr('id');  //get the id of the todoText
+
+                $.ajax({
+                    method: "POST",
+                    url: "/done",
+                    dataType: "json",
+                    data: {todoText: todoText, getID: getID},
+                    success: function () {
+                        $cLI.addClass('done-strike');
+                        $cSpan.removeClass('done-btn btn-success');
+                        $cSpan.closest('span').text('Delete');
+                        $cSpan.closest('span').addClass('delete-btn btn-warning');
+
+                    }
+                });
+            }
+
+
+            /********************************************************************************/
+
             /* Add Todo List Function */
             // Add whatever is typed in the input box into the database
             // "Please enter something" will pop up as an alert if nothing is entered
@@ -87,9 +195,7 @@
                             $('.todo-input').attr('placeholder', 'More Items to add?')
                             if(data != 'empty'){
                                 $('#textField').empty();
-                                $.each(data, function(index, value){
-                                    $('#textField').append('<li>'+value['todo']+'</li><hr>');
-                                });
+                                appendData(data);
                             }
                         }
                     });
@@ -132,9 +238,7 @@
                     success: function (data) {
                         if(data != 'empty'){
                             $('#textField').empty();
-                            $.each(data, function(index, value){
-                                $('#textField').append('<li>'+value['todo']+'</li><hr>');
-                            });
+                            appendData(data);
                         }else{
                             $('#textField').empty();
                             $('#textField').append("<li class='nothing-todo'>Nothing Entered For Today</li>");
@@ -161,6 +265,21 @@
                 }
 
                 return globalCurrentDate = yy+'-'+mm+'-'+dd;
+            }
+
+            /* appendData Function */
+            // Use each loop to loop through the data
+            // Using the done value passed back from PHP from database to check if the item is done or not
+            // If not done, data will be append with a green done button
+            // If done, data will be append with a delete button and item with strikethrough
+            function appendData(data){
+                $.each(data, function(index, value){
+                    if(value['done'] == 0){
+                        $('#textField').append('<li id=' + '"' + value['id'] + '"' + '>' + value['todo'] + '<span class="btn btn-xs btn-success done-btn">Done</span></li><hr>');
+                    }else if(value['done'] === 1){
+                        $('#textField').append('<li id=' + '"' + value['id'] + '"' + 'class="done-strike">'+value['todo']+'<span class="btn btn-xs btn-warning delete-btn">Delete</span></li><hr>');
+                    }
+                });
             }
         });
     </script>
