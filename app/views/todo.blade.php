@@ -72,24 +72,21 @@
             // Add button to add items onto todo list choose a current or future date to add
             $('.add-btn').click(addTodoText);
 
-            $('ol#textField').on('click', '.done-btn', doneButton);
-
-            $('ol#textField').on('click', '.delete-btn', deleteButton);
-
-//            function doubleD(action){
-//                var $clicked = $(this); //Making sure only work with the current element
+            // Done button clicked, button will change from done to delete and database will change too
+            $('ol#textField').on('click', '.done-btn', { action: 'done' }, doubleD);
+            // Delete button clicked, the field will be gone client side but also in database the row will be deleted too
+            $('ol#textField').on('click', '.delete-btn', { action: 'delete' }, doubleD);
+            /*  ALTERNATIVE WAY FOR THE ABOVE WITH ANONYMOUS FUNCTION*/
+//            $('ol#textField').on('click', '.done-btn, .delete-btn', function(e){
+//                e.preventDefault();
 //
-//                var $cLI = $clicked.closest('li');  //Find the closest li element clicked
-//
-//                //Goes to the closest li element and get only the content in li
-//                //Does not include the child element which is what I want
-//                //Or else the done / delete text will be shown too
+//                var $clicked = $(this);
+//                var $cLI = $clicked.closest('li');
 //                var todoText = $cLI.clone().children().remove().end().text();
+//                var getID = $cLI.attr('id');
 //
-//                var getID = $cLI.attr('id');  //get the id of the todoText
-//
-//                if(action == 'done'){
-//                    var $cSpan = $clicked.closest('span');  //Find the closest span element clicked
+//                if( $(this).hasClass('done-btn') ){
+//                    var $cSpan = $clicked.closest('span');
 //                    $.ajax({
 //                        method: "POST",
 //                        url: "/done",
@@ -103,9 +100,7 @@
 //
 //                        }
 //                    });
-//                }
-//
-//                if(action == 'delete'){
+//                }else if( $(this).hasClass('delete-btn') ){
 //                    $.ajax({
 //                        method: "POST",
 //                        url: "/delete",
@@ -117,64 +112,8 @@
 //                        }
 //                    });
 //                }
-//            }
-
-            function deleteButton(e){
-                e.preventDefault();
-
-                var $clicked = $(this); //Making sure only work with the current element
-
-                var $cLI = $clicked.closest('li');  //Find the closest li element clicked
-
-                //Goes to the closest li element and get only the content in li
-                //Does not include the child element which is what I want
-                //Or else the done / delete text will be shown too
-                var todoText = $cLI.clone().children().remove().end().text();
-
-                var getID = $cLI.attr('id');  //get the id of the todoText
-
-                $.ajax({
-                    method: "POST",
-                    url: "/delete",
-                    dataType: "json",
-                    data: {todoText: todoText, getID: getID},
-                    success: function () {
-                        $cLI.next('hr').remove();
-                        $cLI.remove();
-                    }
-                });
-            }
-
-            function doneButton(e){
-                e.preventDefault();
-
-                var $clicked = $(this); //Making sure only work with the current element
-
-                var $cLI = $clicked.closest('li');  //Find the closest li element clicked
-                var $cSpan = $clicked.closest('span');  //Find the closest span element clicked
-
-                //Goes to the closest li element and get only the content in li
-                //Does not include the child element which is what I want
-                //Or else the done / delete text will be shown too
-                var todoText = $cLI.clone().children().remove().end().text();
-
-                var getID = $cLI.attr('id');  //get the id of the todoText
-
-                $.ajax({
-                    method: "POST",
-                    url: "/done",
-                    dataType: "json",
-                    data: {todoText: todoText, getID: getID},
-                    success: function () {
-                        $cLI.addClass('done-strike');
-                        $cSpan.removeClass('done-btn btn-success');
-                        $cSpan.closest('span').text('Delete');
-                        $cSpan.closest('span').addClass('delete-btn btn-warning');
-
-                    }
-                });
-            }
-
+//
+//            });
 
             /********************************************************************************/
 
@@ -280,6 +219,55 @@
                         $('#textField').append('<li id=' + '"' + value['id'] + '"' + 'class="done-strike">'+value['todo']+'<span class="btn btn-xs btn-warning delete-btn">Delete</span></li><hr>');
                     }
                 });
+            }
+
+            /* doubleD Function */
+            // doubleD stands for done / delete
+            // if the event / action of the parameter is done then done ajax will run if the parameter is delete then the delete ajax will run
+            function doubleD(evt){
+                evt.preventDefault();
+                var action = evt.data.action; // ACCESS THE PARAMETER HERE
+
+                var $clicked = $(this); //Making sure only work with the current element
+
+                var $cLI = $clicked.closest('li');  //Find the closest li element clicked
+
+                //Goes to the closest li element and get only the content in li
+                //Does not include the child element which is what I want
+                //Or else the done / delete text will be shown too
+                var todoText = $cLI.clone().children().remove().end().text();
+
+                var getID = $cLI.attr('id');  //get the id of the todoText
+
+                if(action == 'done'){
+                    var $cSpan = $clicked.closest('span');  //Find the closest span element clicked
+                    $.ajax({
+                        method: "POST",
+                        url: "/done",
+                        dataType: "json",
+                        data: {todoText: todoText, getID: getID},
+                        success: function () {
+                            $cLI.addClass('done-strike');
+                            $cSpan.removeClass('done-btn btn-success');
+                            $cSpan.closest('span').text('Delete');
+                            $cSpan.closest('span').addClass('delete-btn btn-warning');
+
+                        }
+                    });
+                }
+
+                if(action == 'delete'){
+                    $.ajax({
+                        method: "POST",
+                        url: "/delete",
+                        dataType: "json",
+                        data: {todoText: todoText, getID: getID},
+                        success: function () {
+                            $cLI.next('hr').remove();
+                            $cLI.remove();
+                        }
+                    });
+                }
             }
         });
     </script>
