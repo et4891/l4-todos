@@ -33,6 +33,7 @@ class TodoController extends BaseController {
 
 		$dateValueWithTimeStamp = date($dateValue . ' H:i:s');
 
+		//Insert into the regular todo table
 		$todo = Todo::create(array(
 			'todoText' 	=> $todoTextInput,
 			'created_at' => $dateValueWithTimeStamp,
@@ -42,6 +43,21 @@ class TodoController extends BaseController {
 		if($todo){
 			$todo->save();
 		}
+		//Done saving into the regular todo table
+
+		/**************************************/
+		/***********List Back Up***************/
+		/**************************************/
+		$todoBackup = TodoBackUp::create(array(
+			'todoText' 	=> $todoTextInput,
+			'created_at' => $dateValueWithTimeStamp,
+			'done' 		=> 0
+		));
+
+		if($todoBackup){
+			$todoBackup->save();
+		}
+		/**************************************/
 
 		echo $this->insertDateValue($dateValue);
 	}
@@ -125,6 +141,16 @@ class TodoController extends BaseController {
 			$todos[0]->done = 1;
 			$todos[0]->touch();
 			$todos[0]->save();
+
+			/**************************************/
+			/*******Done*List Back Up**************/
+			/**************************************/
+			$todoBackup = TodoBackUp::where('id', '=', $id)->where('todoText', '=', $todoText)->get();
+			$todoBackup[0]->done = 1;
+			$todoBackup[0]->touch();
+			$todoBackup[0]->save();
+			/**************************************/
+			/**************************************/
 
 			return json_encode('done-success');
 		}
