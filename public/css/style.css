@@ -1,8 +1,7 @@
-body {
-	font-family: "Trebuchet MS", "Helvetica", "Arial",  "Verdana", "sans-serif";
-	font-size: 62.5%;
-}
-body {
-	font-family: "Trebuchet MS", "Helvetica", "Arial",  "Verdana", "sans-serif";
-	font-size: 62.5%;
-}
+hr{margin-top: 0;}
+
+.nothing-todo{list-style: none;}
+
+.done-btn, .delete-btn{float: right;}
+
+.done-strike{text-decoration: line-through;}
