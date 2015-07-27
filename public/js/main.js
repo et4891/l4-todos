@@ -67,6 +67,8 @@ $(function () {
     /* Add Todo List Function */
     // Add whatever is typed in the input box into the database
     // "Please enter something" will pop up as an alert if nothing is entered
+    // If, which should not happen, Add button is enabled for dates in the past, a check will be done in the backend at PHP side
+    // A false will be passed to the frontend and if Add button is clicked alerts will pop up telling users items cannot be added in past dates only future or current date can add items.
     function addTodoText() {
         var todoTextInput = $('.todo-input').val();
         var dateValue = globalDateValue;
@@ -80,8 +82,13 @@ $(function () {
                     $('.todo-input').val("");
                     $('.todo-input').attr('placeholder', 'More Items to add?')
                     if (data != 'empty') {
-                        $('#textField').empty();
-                        appendData(data);
+                        if(data == false){
+                            alert('Can not add items to the past, only today or future date can be added!');
+                            alert('You can mark items done or delete in the past but not add items!');
+                        }else{
+                            $('#textField').empty();
+                            appendData(data);
+                        }
                     }
                 }
             });

@@ -22,8 +22,8 @@ class TodoController extends BaseController {
 	 * Date chosen or not, a date comparison will happen.
 	 * If a date is not chosen, what is entered will be added into today's date and current time
 	 * If a date is chosen, then what is entered will be added to the date chosen with current time
-	 * This will only be active if date is not chosen (become today's date by default) or if date selected is a future date
-	 * If date chosen is in the past, add will only return a message in the console saying
+	 * This will only be active if date is not chosen,which by default will be current date/time, or if the date selected is in the future.
+	 * If date chosen is in the past and somehow add button is clicked (which shouldn't happen) a boolean will be passed to the client side and javascript alert will pop up.
 	 * After adding, it'll also print a list of the todoText
      */
 	public function add(){
@@ -34,10 +34,11 @@ class TodoController extends BaseController {
 			$dateValue = $_POST['dateValue'];
 		}
 
-		$todayDate = (new DateTime())->format('Y-m-d');
-		$selectDate = (new DateTime($dateValue))->format('Y-m-d');
+		$todayDate = (new DateTime())->format('Y-m-d');					//Get today's date
+		$selectDate = (new DateTime($dateValue))->format('Y-m-d');		//Get selected date
 
-		if(strtotime($todayDate) <= strtotime($selectDate)){
+		$boolean = (strtotime($todayDate) <= strtotime($selectDate));	//Boolean comparison, is selecteDate bigger or equal than todayDate?
+		if($boolean){
 			$dateValueWithTimeStamp = date($dateValue . ' H:i:s');
 
 			//Insert into the regular todo table
@@ -68,7 +69,7 @@ class TodoController extends BaseController {
 
 			echo $this->insertDateValue($dateValue);
 		}else{
-			$data[] = 'Date selected before today cannot add items';
+			$data = $boolean;
 			echo json_encode($data);
 		}
 	}
