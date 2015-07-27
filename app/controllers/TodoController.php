@@ -19,8 +19,11 @@ class TodoController extends BaseController {
 
 	/**
 	 * Adds what is typed in the input field into database
+	 * Date chosen or not, a date comparison will happen.
 	 * If a date is not chosen, what is entered will be added into today's date and current time
 	 * If a date is chosen, then what is entered will be added to the date chosen with current time
+	 * This will only be active if date is not chosen (become today's date by default) or if date selected is a future date
+	 * If date chosen is in the past, add will only return a message in the console saying
 	 * After adding, it'll also print a list of the todoText
      */
 	public function add(){
@@ -31,35 +34,43 @@ class TodoController extends BaseController {
 			$dateValue = $_POST['dateValue'];
 		}
 
-		$dateValueWithTimeStamp = date($dateValue . ' H:i:s');
+		$todayDate = (new DateTime())->format('Y-m-d');
+		$selectDate = (new DateTime($dateValue))->format('Y-m-d');
 
-		//Insert into the regular todo table
-		$todo = Todo::create(array(
-			'todoText' 	=> $todoTextInput,
-			'created_at' => $dateValueWithTimeStamp,
-			'done' 		=> 0
-		));
+		if(strtotime($todayDate) <= strtotime($selectDate)){
+			$dateValueWithTimeStamp = date($dateValue . ' H:i:s');
 
-		if($todo){
-			$todo->save();
+			//Insert into the regular todo table
+			$todo = Todo::create(array(
+				'todoText' 	=> $todoTextInput,
+				'created_at' => $dateValueWithTimeStamp,
+				'done' 		=> 0
+			));
+
+			if($todo){
+				$todo->save();
+			}
+			//Done saving into the regular todo table
+
+			/**************************************/
+			/***********List Back Up***************/
+			/**************************************/
+			$todoBackup = TodoBackUp::create(array(
+				'todoText' 	=> $todoTextInput,
+				'created_at' => $dateValueWithTimeStamp,
+				'done' 		=> 0
+			));
+
+			if($todoBackup){
+				$todoBackup->save();
+			}
+			/**************************************/
+
+			echo $this->insertDateValue($dateValue);
+		}else{
+			$data[] = 'Date selected before today cannot add items';
+			echo json_encode($data);
 		}
-		//Done saving into the regular todo table
-
-		/**************************************/
-		/***********List Back Up***************/
-		/**************************************/
-		$todoBackup = TodoBackUp::create(array(
-			'todoText' 	=> $todoTextInput,
-			'created_at' => $dateValueWithTimeStamp,
-			'done' 		=> 0
-		));
-
-		if($todoBackup){
-			$todoBackup->save();
-		}
-		/**************************************/
-
-		echo $this->insertDateValue($dateValue);
 	}
 
 	/**
