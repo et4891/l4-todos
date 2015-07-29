@@ -7,7 +7,7 @@ use Illuminate\Auth\Reminders\RemindableInterface;
 
 class Todo extends Eloquent implements UserInterface, RemindableInterface {
 
-	protected $fillable = array('userID', 'todoText', 'done', 'created_at', 'updated_at');
+	protected $fillable = array('userID', 'todoText', 'done', 'created_for', 'created_at', 'updated_at');
 
 	use UserTrait, RemindableTrait;
 

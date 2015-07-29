@@ -83,6 +83,7 @@ $(function () {
                     $('.todo-input').attr('placeholder', 'More Items to add?')
                     if (data != 'empty') {
                         if(data == false){
+                            alert('WARNING: Do not delete the disabled attribute yourself!');
                             alert('Can not add items to the past, only today or future date can be added!');
                             alert('You can mark items done or delete in the past but not add items!');
                         }else{

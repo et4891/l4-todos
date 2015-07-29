@@ -18,6 +18,7 @@
 				$table->tinyInteger('userID');
 				$table->text('todoText');
 				$table->boolean('done');
+				$table->date('created_for');
 				$table->timestamps();
 			});
 		}

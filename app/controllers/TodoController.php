@@ -39,10 +39,10 @@ class TodoController extends BaseController {
 
 		$boolean = (strtotime($todayDate) <= strtotime($selectDate));	//Boolean comparison, is selecteDate bigger or equal than todayDate?
 		if($boolean){
-			$dateValueWithTimeStamp = date($dateValue . ' H:i:s');
+			$dateValueWithTimeStamp = date($dateValue . ' H:i:s');		//Not needed anymore but kept on case if the need in the future
 
-            $this->addQuery('Todo', $todoTextInput, $dateValueWithTimeStamp);
-            $this->addQuery('TodoBackUp', $todoTextInput, $dateValueWithTimeStamp);
+            $this->addQuery('Todo', $todoTextInput, $dateValue);
+            $this->addQuery('TodoBackUp', $todoTextInput, $dateValue);
 
 			echo $this->insertDateValue($dateValue);
 		}else{
@@ -56,12 +56,12 @@ class TodoController extends BaseController {
      * Query to save todoText in database
      * @param $table                    - Name of the table to query
      * @param $todoTextInput            - The input for todoText
-     * @param $dateValueWithTimeStamp   - date with timestamp
+     * @param $dateValue   				- Date this item is created for
      */
-    public function addQuery($table, $todoTextInput, $dateValueWithTimeStamp){
+    public function addQuery($table, $todoTextInput, $dateValue){
         $query = $table::create(array(
             'todoText' 	=> $todoTextInput,
-            'created_at' => $dateValueWithTimeStamp,
+            'created_for' => $dateValue,
             'done' 		=> 0
         ));
 
@@ -100,7 +100,7 @@ class TodoController extends BaseController {
 
 		//Use the dateValue (yy-mm-dd) to find all rows with the same dateValue and ignores the time
 		//If nothing can be found, a string of empty will be returned or else the todoText in the database will be returned
-		$todos = Todo::where('created_at', 'LIKE',  $dateValue.'%')->get();
+		$todos = Todo::where('created_for', 'LIKE',  $dateValue.'%')->get();
 		if(sizeof($todos) == 0){
 			$data[$index] = 'empty';
 		}else{
