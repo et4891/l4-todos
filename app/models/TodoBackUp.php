@@ -16,7 +16,7 @@ class TodoBackUp extends Eloquent implements UserInterface, RemindableInterface 
 	 *
 	 * @var string
 	 */
-	protected $table = 'todo_backup';
+	protected $table = 'l4_todo_backup';
 
 	/**
 	 * The attributes excluded from the model's JSON form.

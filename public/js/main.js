@@ -75,7 +75,7 @@ $(function () {
         if (todoTextInput) {
             $.ajax({
                 method: "POST",
-                url: "/add",
+                url: "../public/add",
                 dataType: "json",
                 data: {todoTextInput: todoTextInput, dateValue: dateValue},
                 success: function (data) {
@@ -126,7 +126,7 @@ $(function () {
     function searchDateAjax(dateValue) {
         $.ajax({
             method: "POST",
-            url: "/search",
+            url: "../public/search",
             dataType: "json",
             data: {dateValue: dateValue},
             success: function (data) {
@@ -198,7 +198,7 @@ $(function () {
             var $cSpan = $clicked.closest('span');  //Find the closest span element clicked
             $.ajax({
                 method: "POST",
-                url: "/done",
+                url: "../public/done",
                 dataType: "json",
                 data: {todoText: todoText, getID: getID},
                 success: function () {
@@ -214,7 +214,7 @@ $(function () {
         if (action == 'delete') {
             $.ajax({
                 method: "POST",
-                url: "/delete",
+                url: "../public/delete",
                 dataType: "json",
                 data: {todoText: todoText, getID: getID},
                 success: function () {

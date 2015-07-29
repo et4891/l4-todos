@@ -16,7 +16,7 @@ class Todo extends Eloquent implements UserInterface, RemindableInterface {
 	 *
 	 * @var string
 	 */
-	protected $table = 'todo';
+	protected $table = 'l4_todo';
 
 	/**
 	 * The attributes excluded from the model's JSON form.
