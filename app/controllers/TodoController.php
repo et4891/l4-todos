@@ -41,31 +41,8 @@ class TodoController extends BaseController {
 		if($boolean){
 			$dateValueWithTimeStamp = date($dateValue . ' H:i:s');
 
-			//Insert into the regular todo table
-			$todo = Todo::create(array(
-				'todoText' 	=> $todoTextInput,
-				'created_at' => $dateValueWithTimeStamp,
-				'done' 		=> 0
-			));
-
-			if($todo){
-				$todo->save();
-			}
-			//Done saving into the regular todo table
-
-			/**************************************/
-			/***********List Back Up***************/
-			/**************************************/
-			$todoBackup = TodoBackUp::create(array(
-				'todoText' 	=> $todoTextInput,
-				'created_at' => $dateValueWithTimeStamp,
-				'done' 		=> 0
-			));
-
-			if($todoBackup){
-				$todoBackup->save();
-			}
-			/**************************************/
+            $this->addQuery('Todo', $todoTextInput, $dateValueWithTimeStamp);
+            $this->addQuery('TodoBackUp', $todoTextInput, $dateValueWithTimeStamp);
 
 			echo $this->insertDateValue($dateValue);
 		}else{
@@ -73,6 +50,25 @@ class TodoController extends BaseController {
 			echo json_encode($data);
 		}
 	}
+
+    /**
+     * Used in add()
+     * Query to save todoText in database
+     * @param $table                    - Name of the table to query
+     * @param $todoTextInput            - The input for todoText
+     * @param $dateValueWithTimeStamp   - date with timestamp
+     */
+    public function addQuery($table, $todoTextInput, $dateValueWithTimeStamp){
+        $query = $table::create(array(
+            'todoText' 	=> $todoTextInput,
+            'created_at' => $dateValueWithTimeStamp,
+            'done' 		=> 0
+        ));
+
+        if($query){
+            $query->save();
+        }
+    }
 
 	/**
 	 * Simply uses the dateValue in the format of yy-mm-dd to pull the todo list out of the database
@@ -134,7 +130,7 @@ class TodoController extends BaseController {
 
 	/**
 	 * Used in done() and delete()
-	 * The specific row is determined by using the id and the todoText
+	 * The specific row is determined by using the id, the todoText and the done
 	 * If both of them matches the row in the database, that is the row needed.
 	 *
 	 * When action done is passed into the parameter, the database will change the row's done column to 1 which means the item is done
@@ -149,31 +145,41 @@ class TodoController extends BaseController {
 		$todoText = htmlentities($_POST['todoText']);
 
 		if($action == 'done'){
-			$todos = Todo::where('id', '=', $id)->where('todoText', '=', $todoText)->get();
-			$todos[0]->done = 1;
-			$todos[0]->touch();
-			$todos[0]->save();
-
-			/**************************************/
-			/*******Done*List Back Up**************/
-			/**************************************/
-			$todoBackup = TodoBackUp::where('id', '=', $id)->where('todoText', '=', $todoText)->get();
-			$todoBackup[0]->done = 1;
-			$todoBackup[0]->touch();
-			$todoBackup[0]->save();
-			/**************************************/
-			/**************************************/
-
+			$this->doubleDQuery('Todo', $id, $todoText, 0, $action);
+			$this->doubleDQuery('TodoBackUp', $id, $todoText, 0, $action);
 			return json_encode('done-success');
 		}
 
 		if($action == 'delete'){
-			$todos = Todo::where('id', '=', $id)->where('todoText', '=', $todoText)
-				->where('done', '=', 1)->get();
-			$todos[0]->delete();
-
+			$this->doubleDQuery('Todo', $id, $todoText, 1, $action);
 			return json_encode('delete-success');
 		}
 
 	}
+
+	/**
+	 * Used in doubleD()
+	 * A function for querying the database since this is done repeatedly few times in doubleD()
+	 * @param $table			- Name of the table to query
+	 * @param $id				- Match the id in the table while querying
+	 * @param $todoText			- Match the todoText in the table while querying
+	 * @param $done				- Match the done in the table while querying
+	 * @param $action			- If this function is used for done then query will change done column to 1, update the update_at column and saves
+	 *							- If this function is used for delete then it'll delete the row in database
+     */
+	public function doubleDQuery($table, $id, $todoText, $done, $action){
+		$query = $table::where('id', '=', $id)->where('todoText', '=', $todoText)
+			->where('done', '=', $done)->first();
+		if($action == 'done'){
+			$query->done = 1;
+			$query->touch();
+			$query->save();
+		}
+
+		if($action == 'delete'){
+			$query->delete();
+		}
+
+	}
+
 }
